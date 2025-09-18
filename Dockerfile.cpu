@@ -12,10 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg git && \
     rm -rf /var/lib/apt/lists/*
 
-# 确保 python/pip 指向 3.11
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1 && \
-    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
-
 WORKDIR /app
 
 # 配置 pip 使用清华源
