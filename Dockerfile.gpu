@@ -4,8 +4,8 @@ FROM nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # 使用清华源替换 apt 源
-RUN sed -i 's|http://archive.ubuntu.com/ubuntu/|https://mirrors.tuna.tsinghua.edu.cn/ubuntu/|g' /etc/apt/sources.list && \
-    sed -i 's|http://security.ubuntu.com/ubuntu/|https://mirrors.tuna.tsinghua.edu.cn/ubuntu/|g' /etc/apt/sources.list
+# RUN sed -i 's|http://archive.ubuntu.com/ubuntu/|https://mirrors.tuna.tsinghua.edu.cn/ubuntu/|g' /etc/apt/sources.list && \
+#     sed -i 's|http://security.ubuntu.com/ubuntu/|https://mirrors.tuna.tsinghua.edu.cn/ubuntu/|g' /etc/apt/sources.list
 
 # 安装 Python3.11 + pip + ffmpeg + git
 RUN apt-get update && \
@@ -21,8 +21,8 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1 &
 WORKDIR /app
 
 # 配置 pip 使用清华源
-RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
-    pip config set install.trusted-host pypi.tuna.tsinghua.edu.cn
+# RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
+#     pip config set install.trusted-host pypi.tuna.tsinghua.edu.cn
 
 # 拷贝依赖文件并安装
 COPY requirements.txt ./
