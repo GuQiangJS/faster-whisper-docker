@@ -1,10 +1,28 @@
+version: '3.8'
+
 services:
-  whisper-service:
-    build: .
-    container_name: whisper-service
+  whisper-service-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.cpu
+    container_name: whisper-service-cpu
     restart: unless-stopped
     ports:
       - "8000:8000"
+    volumes:
+      - ./hf-hub-cache:/root/.cache/huggingface/hub
+    environment:
+      - WHISPER_MODEL=Systran/faster-whisper-large-v2
+      - DEVICE=cpu
+
+  whisper-service-gpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    container_name: whisper-service-gpu
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
     volumes:
       - ./hf-hub-cache:/root/.cache/huggingface/hub
     environment:
@@ -14,4 +32,4 @@ services:
       resources:
         reservations:
           devices:
-            - capabilities: [gpu]  # 仅在 CUDA 模式下需要
+            - capabilities: [gpu]

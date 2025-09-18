@@ -109,8 +109,8 @@ logging.basicConfig(level=logging.INFO)
 
 
 @app.delete("/v1/models/release")
-async def release_model(model: str = Query("medium"),
-                        device: str = Query("auto")):
+async def release_model(model: str = Query("Systran/faster-whisper-large-v2"),
+                        device: str = Query(os.environ.get("DEVICE", "auto"))):
     """
     释放指定模型vi
     """
@@ -134,8 +134,8 @@ async def release_all_models():
 async def transcribe(
         # 文件上传方式（类文件对象）
         audio: Optional[UploadFile] = File(None, description="音频文件（二进制流）"),
-        model: str = Query("medium"),
-        device: str = Query("auto"),
+        model: str = Query("Systran/faster-whisper-large-v2"),
+        device: str = Query(os.environ.get("DEVICE", "auto")),
         compute_type: str = Query("default"),
         language: Optional[str] = Query(None),
         vad_filter: Optional[bool] = Query(False),
@@ -185,8 +185,8 @@ async def transcribe(
 @app.post("/v1/audio/transcriptions/waveform", response_model=List[Dict])
 async def transcribe_waveform(
         audio: AudioWaveform = Body(...),
-        model: str = Query("medium"),
-        device: str = Query("cpu"),
+        model: str = Query("Systran/faster-whisper-large-v2"),
+        device: str = Query(os.environ.get("DEVICE", "auto")),
         compute_type: str = Query("default"),
         language: Optional[str] = Query(None),
         vad_filter: Optional[bool] = Query(False),

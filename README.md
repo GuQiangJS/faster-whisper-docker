@@ -10,27 +10,68 @@ faster-whisper-docker 是一个基于 Docker 的语音识别服务部署项目�
 
 - 简单易用，只需用 docker-compose 构建或拉取镜像即可运行。
 
-# 构建方式
+## 版本说明
 
-## 自行构建
+本项目提供两个版本的镜像：
+
+- CPU 版本：适用于没有 GPU 或不需要 GPU 加速的环境
+- GPU 版本：适用于支持 CUDA 的 NVIDIA GPU，提供更快的转录速度
+
+## 构建方式
+
+### 自行构建
 
 ```bash
 git clone https://github.com/GuQiangJS/faster-whisper-docker.git
-docker-compose up -d --build
+cd faster-whisper-docker
 ```
 
-## 拉取镜像方式
+构建并运行 CPU 版本：
 
 ```bash
-docker pull ghcr.io/guqiangjs/faster-whisper-docker:latest
+docker-compose up -d --build whisper-service-cpu
 ```
 
-# 调用方式
-
-## 上传文件方式调用
+构建并运行 GPU 版本：
 
 ```bash
-curl -X POST "http://127.0.0.1:8000/v1/audio/transcriptions?model=Systran/faster-whisper-large-v2&device=cuda&language=ja" -F "audio=@sampleTokyo.wav"
+docker-compose up -d --build whisper-service-gpu
+```
+
+### 拉取镜像方式
+
+拉取 CPU 版本：
+
+```bash
+docker pull ghcr.io/guqiangjs/faster-whisper-docker:cpu-latest
+```
+
+拉取 GPU 版本：
+
+```bash
+docker pull ghcr.io/guqiangjs/faster-whisper-docker:gpu-latest
+```
+
+## 调用方式
+
+### 上传文件方式调用
+
+CPU 版本调用示例：
+
+```bash
+curl -X POST "http://127.0.0.1:8000/v1/audio/transcriptions?model=Systran/faster-whisper-large-v2&device=cpu&language=ja" -F "audio=@sampleTokyo.wav"
+```
+
+GPU 版本调用示例：
+
+```bash
+curl -X POST "http://127.0.0.1:8001/v1/audio/transcriptions?model=Systran/faster-whisper-large-v2&device=cuda&language=ja" -F "audio=@sampleTokyo.wav"
+```
+
+模型默认为`Systran/faster-whisper-large-v2`。使用默认模型参数，调用示例：
+
+```bash
+curl -X POST "http://127.0.0.1:8000/v1/audio/transcriptions?language=ja" -F "audio=@sampleTokyo.wav"
 ```
 
 参考 [test_file.py](examples/post_file.py) 。
@@ -48,7 +89,7 @@ curl -X POST "http://127.0.0.1:8000/v1/audio/transcriptions?model=Systran/faster
 耗时 7.02 秒
 ```
 
-## 上传音频流方式调用
+### 上传音频流方式调用
 
 参考 [test_wave.py](examples/post_wave.py) 。
 
@@ -73,18 +114,39 @@ curl -X POST "http://127.0.0.1:8000/v1/audio/transcriptions?model=Systran/faster
 耗时 10.07 秒
 ```
 
-## 释放单个模型
+### 释放单个模型
 
-```http
-DELETE /v1/models/release/?model=medium&device=cuda
+```bash
+curl -X DELETE "http://127.0.0.1:8000/v1/models/release?model=medium&device=cuda"
 ```
 
 参考 [release_model.py](examples/release_model.py) 。
 
-## 释放全部模型
+### 释放全部模型
 
-```http
-DELETE /v1/models/release_all
+```bash
+curl -X DELETE "http://127.0.0.1:8000/v1/models/release_all"
 ```
 
 参考 [release_all_models.py](examples/release_all_models.py) 。
+
+## 端口说明
+
+- CPU 版本默认运行在端口 8000
+- GPU 版本默认运行在端口 8001
+
+## 环境变量
+
+- `WHISPER_MODEL`：默认使用的模型名称，默认值为`Systran/faster-whisper-large-v2`
+- `DEVICE`：默认设备类型，CPU 版本默认为`cpu`，GPU 版本默认为`cuda`
+- 如果环境无法访问 huggingface，可以在 `docker-compose.yml` 中添加代理环境变量
+  ```yaml
+  environment:
+    - http_proxy=http://代理服务器IP:端口
+    - https_proxy=http://代理服务器IP:端口
+    # 如果代理需要认证
+    # - http_proxy=http://用户名:密码@代理服务器IP:端口
+    # - https_proxy=http://用户名:密码@代理服务器IP:端口
+    # 可选：设置不需要代理的地址（如内部服务）
+    - no_proxy=localhost,127.0.0.1,.example.com
+  ```

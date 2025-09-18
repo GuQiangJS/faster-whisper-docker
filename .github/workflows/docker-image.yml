@@ -1,10 +1,10 @@
-name: Build and Push Docker Image
+name: Build and Push Docker Images
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   docker:
@@ -16,11 +16,11 @@ jobs:
       id-token: write
 
     steps:
-      # 1️⃣ 拉取代码
+      # 拉取代码
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ 登录 GitHub Container Registry
+      # 登录 GitHub Container Registry
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -28,16 +28,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 3️⃣ 规范化仓库名（转小写）
+      # 规范化仓库名（转小写）
       - name: Set lowercase repository name
         run: echo "REPO=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
-      # 4️⃣ 构建 Docker 镜像
-      - name: Build Docker image
+      # 构建并推送 CPU 镜像
+      - name: Build and push CPU Docker image
         run: |
-          docker build --build-arg WHISPER_MODEL=Systran/faster-whisper-large-v2 -t ghcr.io/${REPO}/whisper-service:latest .
+          docker build -f Dockerfile.cpu -t ghcr.io/${REPO}/whisper-service:cpu-latest .
+          docker push ghcr.io/${REPO}/whisper-service:cpu-latest
 
-      # 5️⃣ 推送镜像到 GHCR
-      - name: Push Docker image
+      # 构建并推送 GPU 镜像
+      - name: Build and push GPU Docker image
         run: |
-          docker push ghcr.io/${REPO}/whisper-service:latest
+          docker build -f Dockerfile.gpu -t ghcr.io/${REPO}/whisper-service:gpu-latest .
+          docker push ghcr.io/${REPO}/whisper-service:gpu-latest
