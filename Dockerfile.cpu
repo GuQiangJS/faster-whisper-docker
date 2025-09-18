@@ -20,7 +20,9 @@ WORKDIR /app
 
 # 拷贝依赖文件并安装
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt --index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements-pytorch.txt ./
+RUN pip install --no-cache-dir -r requirements-pytorch.txt --index-url https://download.pytorch.org/whl/cpu
 
 # 拷贝应用代码
 COPY ./main.py . 
