@@ -1,0 +1,62 @@
+# Python字节码文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 分发/打包
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虚拟环境
+venv/
+env/
+ENV/
+.env
+.venv
+
+# 测试相关
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# 日志文件
+logs/
+*.log
+
+# 编辑器配置文件
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Docker相关
+.dockerignore
+Dockerfile
+docker-compose.yml
+.docker/
+
+# 其他临时文件
+tmp/
+temp/

@@ -1,0 +1,93 @@
+# Python字节码和缓存
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 分发/打包
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 虚拟环境
+venv/
+env/
+ENV/
+.env
+.venv
+.conda
+.env.local
+
+# 测试和覆盖率
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# 日志
+logs/
+*.log
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# 编辑器配置
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# 操作系统相关
+.DS_Store
+Thumbs.db
+
+# 数据库相关
+*.sqlite3
+*.db
+*.sql
+
+# 秘钥和配置
+*.env
+*.ini
+*.pem
+*.key
+!requirements.ini
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# 其他
+tmp/
+temp/
+*.bak
+*.old

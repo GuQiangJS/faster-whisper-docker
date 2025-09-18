@@ -1,0 +1,17 @@
+services:
+  whisper-service:
+    build: .
+    container_name: whisper-service
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./hf-hub-cache:/root/.cache/huggingface/hub
+    environment:
+      - WHISPER_MODEL=Systran/faster-whisper-large-v2
+      - DEVICE=cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]  # 仅在 CUDA 模式下需要
