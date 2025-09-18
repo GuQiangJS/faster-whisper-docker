@@ -28,7 +28,7 @@ RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY requirements-pytorch.txt ./
-RUN pip install --no-cache-dir -r requirements-pytorch.txt --index-url https://download.pytorch.org/whl/cu121
+RUN pip install torch==2.8.0 --no-cache-dir --index-url https://download.pytorch.org/whl/cu121
 
 # 拷贝应用代码
 COPY ./main.py . 
