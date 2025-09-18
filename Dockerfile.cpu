@@ -19,8 +19,8 @@ WORKDIR /app
 #     pip config set install.trusted-host pypi.tuna.tsinghua.edu.cn
 
 # 拷贝依赖文件并安装
-COPY requirements-base.txt requirements-cpu.txt ./
-RUN pip install --no-cache-dir -r requirements-cpu.txt -f https://download.pytorch.org/whl/torch_stable.html
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt --index-url https://download.pytorch.org/whl/cpu
 
 # 拷贝应用代码
 COPY ./main.py . 

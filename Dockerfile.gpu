@@ -25,8 +25,8 @@ RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && 
     pip config set install.trusted-host pypi.tuna.tsinghua.edu.cn
 
 # 拷贝依赖文件并安装
-COPY requirements-base.txt requirements-gpu.txt ./
-RUN pip install --no-cache-dir -r requirements-gpu.txt
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
 # 拷贝应用代码
 COPY ./main.py . 

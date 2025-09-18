@@ -4,3 +4,5 @@ python-multipart~=0.0.20
 faster-whisper~=1.2.0
 numpy~=2.2.6
 aiofiles~=24.1.0
+torch~=2.8.0
+torchaudio~=2.8.0
