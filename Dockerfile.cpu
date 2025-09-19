@@ -26,7 +26,7 @@ RUN pip install torch==2.8.0+cpu --no-cache-dir --index-url https://download.pyt
 # 拷贝应用代码
 COPY ./main.py . 
 
-ENV WHISPER_MODEL=medium
+ENV WHISPER_MODEL=Systran/faster-whisper-large-v2
 ENV DEVICE=cpu
 
 EXPOSE 8000

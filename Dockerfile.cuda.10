@@ -1,5 +1,6 @@
-# Dockerfile.gpu
-FROM nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04
+# 老旧CUDA使用的镜像，CUDA10版本
+
+FROM pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -7,17 +8,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 # RUN sed -i 's|http://archive.ubuntu.com/ubuntu/|https://mirrors.tuna.tsinghua.edu.cn/ubuntu/|g' /etc/apt/sources.list && \
 #     sed -i 's|http://security.ubuntu.com/ubuntu/|https://mirrors.tuna.tsinghua.edu.cn/ubuntu/|g' /etc/apt/sources.list
 
-# 安装 Python3.11 + pip + ffmpeg + git
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    python3.11 python3.11-venv python3.11-dev \
-    python3-pip ffmpeg git && \
+# 安装基础工具 + 命令行 ffmpeg
+RUN apt update && \
+    apt install -y wget git pkg-config build-essential ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
-# 确保 python/pip 指向 3.11
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1 && \
-    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+# 1. Accept TOS for required channels
+RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
 
+# 2. (Optional) Update conda after accepting TOS
+RUN conda update -n base -c defaults conda -y
+
+# 3. Install pyav
+RUN conda install -y conda-forge::av && conda clean -afy
 WORKDIR /app
 
 # 配置 pip 使用清华源
@@ -27,7 +31,6 @@ WORKDIR /app
 # 拷贝依赖文件并安装
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install torch==2.8.0 --no-cache-dir
 
 # 拷贝应用代码
 COPY ./main.py . 
