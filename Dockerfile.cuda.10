@@ -13,6 +13,10 @@ RUN apt update && \
     apt install -y wget git pkg-config build-essential ffmpeg && \
     rm -rf /var/lib/apt/lists/*
 
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py39_25.7.0-2-Linux-x86_64.sh -O miniconda.sh && \
+    bash miniconda.sh -b -u -p /opt/conda && \
+    rm -f miniconda.sh
+
 # 1. Accept TOS for required channels
 RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
