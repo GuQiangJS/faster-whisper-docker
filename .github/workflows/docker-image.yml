@@ -43,9 +43,12 @@ jobs:
           - base_image: 11.6.1-cudnn8-runtime-ubuntu20.04
             torch_version: 1.13.1
             torch_cuda_suffix: cu116
-          - base_image: 12.3.2-cudnn9-runtime-ubuntu22.04
-            torch_version: 2.8.0
+          - base_image: 12.1.0-cudnn8-runtime-ubuntu22.04
+            torch_version: 2.5.1
             torch_cuda_suffix: cu121
+          - base_image: 12.6.3-cudnn-runtime-ubuntu24.04
+            torch_version: 2.8.0
+            torch_cuda_suffix: cu126
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
