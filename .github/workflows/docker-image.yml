@@ -1,26 +1,10 @@
-name: Build and Push Docker Images
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
 jobs:
-  docker:
+  build-cpu:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-
     steps:
-      # 拉取代码
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 登录 GitHub Container Registry
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -28,18 +12,53 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 规范化仓库名（转小写）
       - name: Set lowercase repository name
         run: echo "REPO=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
-      # 构建并推送 CPU 镜像
       - name: Build and push CPU Docker image
         run: |
-          docker build -f Dockerfile.cpu -t ghcr.io/${REPO}/whisper-service:cpu-latest .
-          docker push ghcr.io/${REPO}/whisper-service:cpu-latest
+          DATE_TAG=$(date +%Y%m%d)
+          IMAGE=ghcr.io/${REPO}/whisper-service
+          docker build -f Dockerfile.cpu \
+            -t $IMAGE:cpu-latest \
+            -t $IMAGE:cpu-${DATE_TAG} .
+          docker push $IMAGE:cpu-latest
+          docker push $IMAGE:cpu-${DATE_TAG}
 
-      # 构建并推送 GPU 镜像
+  build-gpu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - base_image: 11.6.1-cudnn8-runtime-ubuntu20.04
+            torch_version: 1.13.1
+            torch_cuda_suffix: cu116
+          - base_image: 12.3.2-cudnn9-runtime-ubuntu22.04
+            torch_version: 2.8.0
+            torch_cuda_suffix: cu121
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set lowercase repository name
+        run: echo "REPO=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: Build and push GPU Docker image
         run: |
-          docker build -f Dockerfile.gpu -t ghcr.io/${REPO}/whisper-service:gpu-latest .
-          docker push ghcr.io/${REPO}/whisper-service:gpu-latest
+          DATE_TAG=$(date +%Y%m%d)
+          IMAGE=ghcr.io/${REPO}/whisper-service
+          docker build -f Dockerfile.cuda \
+            --build-arg BASE_IMAGE=${{ matrix.base_image }} \
+            --build-arg TORCH_VERSION=${{ matrix.torch_version }} \
+            --build-arg TORCH_CUDA_SUFFIX=${{ matrix.torch_cuda_suffix }} \
+            -t $IMAGE:cuda${{ matrix.torch_cuda_suffix }}-latest \
+            -t $IMAGE:cuda${{ matrix.torch_cuda_suffix }}-${DATE_TAG} .
+          docker push $IMAGE:cuda${{ matrix.torch_cuda_suffix }}-latest
+          docker push $IMAGE:cuda${{ matrix.torch_cuda_suffix }}-${DATE_TAG}
