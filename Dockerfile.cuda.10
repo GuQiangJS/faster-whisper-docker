@@ -1,94 +1,107 @@
-# Use Ubuntu 18.04 so CUDA 10.2 official apt packages are available
-FROM ubuntu:18.04
+# # Use Ubuntu 18.04 so CUDA 10.2 official apt packages are available
+# FROM ubuntu:18.04
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Etc/UTC
+# ENV DEBIAN_FRONTEND=noninteractive
+# ENV TZ=Etc/UTC
 
-# URLs (NVIDIA official repos)
-ENV CUDA_REPO_DEB="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb"
-ENV NVIDIA_ML_REPO_DEB="https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/nvidia-machine-learning-repo-ubuntu1804_1.0.0-1_amd64.deb"
-ENV CUDA_KEYRING_DEB="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-keyring_1.0-1_all.deb"
+# # URLs (NVIDIA official repos)
+# ENV CUDA_REPO_DEB="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb"
+# ENV NVIDIA_ML_REPO_DEB="https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/nvidia-machine-learning-repo-ubuntu1804_1.0.0-1_amd64.deb"
+# ENV CUDA_KEYRING_DEB="https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-keyring_1.0-1_all.deb"
 
-ENV CUDA_HOME=/usr/local/cuda-10.2
-ENV PATH=${CUDA_HOME}/bin:${PATH}
-ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+# ENV CUDA_HOME=/usr/local/cuda-10.2
+# ENV PATH=${CUDA_HOME}/bin:${PATH}
+# ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
 
-# 使用清华源替换 apt 源
-RUN sed -i 's|http://archive.ubuntu.com/ubuntu/|http://mirrors.tuna.tsinghua.edu.cn/ubuntu/|g' /etc/apt/sources.list
+# # 使用清华源替换 apt 源
+# RUN sed -i 's|http://archive.ubuntu.com/ubuntu/|http://mirrors.tuna.tsinghua.edu.cn/ubuntu/|g' /etc/apt/sources.list
 
-# 1) 基本工具
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates wget gnupg2 lsb-release apt-transport-https \
-    curl software-properties-common build-essential \
-    libglib2.0-0 libsm6 libxrender1 libxext6 libgl1 \
-    && rm -rf /var/lib/apt/lists/*
+# # 1) 基本工具
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     ca-certificates wget gnupg2 lsb-release apt-transport-https \
+#     curl software-properties-common build-essential \
+#     libglib2.0-0 libsm6 libxrender1 libxext6 libgl1 \
+#     && rm -rf /var/lib/apt/lists/*
 
-# 2) 安装 NVIDIA 官方的 cuda-keyring（解决 GPG key rotation 问题）
-#    这是关键：它会把 NVIDIA 的新签名 key 安装到系统 keyring 中，避免 NO_PUBKEY 错误。
-RUN wget -qO /tmp/cuda-keyring.deb ${CUDA_KEYRING_DEB} \
-    && dpkg -i /tmp/cuda-keyring.deb \
-    && rm -f /tmp/cuda-keyring.deb \
-    && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub || true
+# # 2) 安装 NVIDIA 官方的 cuda-keyring（解决 GPG key rotation 问题）
+# #    这是关键：它会把 NVIDIA 的新签名 key 安装到系统 keyring 中，避免 NO_PUBKEY 错误。
+# RUN wget -qO /tmp/cuda-keyring.deb ${CUDA_KEYRING_DEB} \
+#     && dpkg -i /tmp/cuda-keyring.deb \
+#     && rm -f /tmp/cuda-keyring.deb \
+#     && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub || true
 
-# 3) 安装 repo .deb（会在 /etc/apt/sources.list.d/ 下创建对应源）
-#RUN wget -qO /tmp/cuda-repo.deb ${CUDA_REPO_DEB} \
-#    && dpkg -i /tmp/cuda-repo.deb \
-#    && rm -f /tmp/cuda-repo.deb \
-#    && wget -qO /tmp/nvidia-ml.deb ${NVIDIA_ML_REPO_DEB} \
-#    && dpkg -i /tmp/nvidia-ml.deb || true \
-#    && rm -f /tmp/nvidia-ml.deb
+# # 3) 安装 repo .deb（会在 /etc/apt/sources.list.d/ 下创建对应源）
+# #RUN wget -qO /tmp/cuda-repo.deb ${CUDA_REPO_DEB} \
+# #    && dpkg -i /tmp/cuda-repo.deb \
+# #    && rm -f /tmp/cuda-repo.deb \
+# #    && wget -qO /tmp/nvidia-ml.deb ${NVIDIA_ML_REPO_DEB} \
+# #    && dpkg -i /tmp/nvidia-ml.deb || true \
+# #    && rm -f /tmp/nvidia-ml.deb
 
-# 添加 machine-learning repo (提供 libcudnn7)
-RUN wget -qO /tmp/nvidia-ml.deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/nvidia-machine-learning-repo-ubuntu1804_1.0.0-1_amd64.deb \
-    && dpkg -i /tmp/nvidia-ml.deb \
-    && rm -f /tmp/nvidia-ml.deb
+# # 添加 machine-learning repo (提供 libcudnn7)
+# RUN wget -qO /tmp/nvidia-ml.deb https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/nvidia-machine-learning-repo-ubuntu1804_1.0.0-1_amd64.deb \
+#     && dpkg -i /tmp/nvidia-ml.deb \
+#     && rm -f /tmp/nvidia-ml.deb
 
-# 4) 更新索引并安装 CUDA toolkit 10.2 (toolkit only, 不含 display 驱动) + cuDNN7
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    cuda-toolkit-10-2 \
-    libcudnn7 libcudnn7-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# # 4) 更新索引并安装 CUDA toolkit 10.2 (toolkit only, 不含 display 驱动) + cuDNN7
+# RUN apt-get update \
+#     && apt-get install -y --no-install-recommends \
+#     cuda-toolkit-10-2 \
+#     libcudnn7 libcudnn7-dev \
+#     && apt-get clean \
+#     && rm -rf /var/lib/apt/lists/*
 
-# 5) 链接 /usr/local/cuda -> 指向 10.2（若已存在则无害）
-RUN ln -s /usr/local/cuda-10.2 /usr/local/cuda || true
+# # 5) 链接 /usr/local/cuda -> 指向 10.2（若已存在则无害）
+# RUN ln -s /usr/local/cuda-10.2 /usr/local/cuda || true
 
-# 6) 安装 Python3.8（deadsnakes）与 pip
-RUN add-apt-repository ppa:deadsnakes/ppa -y \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends \
-    python3.8 python3.8-dev python3.8-venv python3.8-distutils \
-    && curl -sS https://bootstrap.pypa.io/pip/3.8/get-pip.py -o /tmp/get-pip.py \
-    && python3.8 /tmp/get-pip.py \
-    && python3.8 -m pip install --no-cache-dir --upgrade pip setuptools wheel \
-    && rm -rf /var/lib/apt/lists/* /tmp/get-pip.py
+# # 6) 安装 Python3.8（deadsnakes）与 pip
+# RUN add-apt-repository ppa:deadsnakes/ppa -y \
+#     && apt-get update \
+#     && apt-get install -y --no-install-recommends \
+#     python3.8 python3.8-dev python3.8-venv python3.8-distutils \
+#     && curl -sS https://bootstrap.pypa.io/pip/3.8/get-pip.py -o /tmp/get-pip.py \
+#     && python3.8 /tmp/get-pip.py \
+#     && python3.8 -m pip install --no-cache-dir --upgrade pip setuptools wheel \
+#     && rm -rf /var/lib/apt/lists/* /tmp/get-pip.py
 
-# 让 /usr/bin/python3 指向 python3.8（可选）
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1 || true
+# # 让 /usr/bin/python3 指向 python3.8（可选）
+# RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1 || true
 
-WORKDIR /workspace
 
-# 配置 pip 使用清华源
-RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
-    pip config set install.trusted-host pypi.tuna.tsinghua.edu.cn
+# RUN wget https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-x86_64/cudnn-linux-x86_64-8.5.0.96_cuda10-archive.tar.xz && \
+#     tar -xvf cudnn-linux-x86_64-8.5.0.96_cuda10-archive.tar.xz && \
+#     cp cudnn-linux-x86_64-8.5.0.96_cuda10-archive/include/cudnn*.h /usr/local/cuda/include/ && \
+#     cp cudnn-linux-x86_64-8.5.0.96_cuda10-archive/lib/libcudnn* /usr/local/cuda/lib64/ && \
+#     chmod a+r /usr/local/cuda/include/cudnn*.h /usr/local/cuda/lib64/libcudnn*
 
-# 7) PyTorch 1.9.0 (CUDA 10.2 wheels)
-RUN python3.8 -m pip install --no-cache-dir \
-    "torch==1.9.0+cu102" \
-    "torchvision==0.10.0+cu102" \
-    "torchaudio==0.9.0" \
-    -f https://download.pytorch.org/whl/torch_stable.html
+# # export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+# ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
 
-# 8) 应用依赖 & 代码（按你原始布局）
-COPY requirements.txt ./
-RUN python3.8 -m pip install --no-cache-dir -r requirements.txt
 
-COPY ./main.py .
+# WORKDIR /workspace
 
-ENV WHISPER_MODEL=Systran/faster-whisper-large-v2
-ENV DEVICE=cuda
+# # 配置 pip 使用清华源
+# RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
+#     pip config set install.trusted-host pypi.tuna.tsinghua.edu.cn
 
-EXPOSE 8000
+# # 7) PyTorch 1.9.0 (CUDA 10.2 wheels)
+# RUN python3.8 -m pip install --no-cache-dir \
+#     "torch==1.9.0+cu102" \
+#     "torchvision==0.10.0+cu102" \
+#     "torchaudio==0.9.0" \
+#     -f https://download.pytorch.org/whl/torch_stable.html
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# # 8) 应用依赖 & 代码（按你原始布局）
+# COPY requirements.txt ./
+# RUN python3.8 -m pip install --no-cache-dir -r requirements.txt
+
+# RUN pip install --force-reinstall ctranslate2==4.4.0
+
+# COPY ./main.py .
+
+# ENV WHISPER_MODEL=Systran/faster-whisper-large-v2
+# ENV DEVICE=cuda
+
+# EXPOSE 8000
+
+# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
