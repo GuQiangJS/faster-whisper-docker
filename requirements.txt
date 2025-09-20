@@ -1,6 +1,11 @@
 fastapi==0.116.2
 uvicorn[standard]==0.33.0
 python-multipart==0.0.20
-tokenizers==0.22.0
-faster-whisper==1.2.0
 aiofiles==24.1.0
+
+# tokenizers 和 faster-whisper 根据 Python 版本选择
+tokenizers==0.20.3; python_version < "3.9"
+tokenizers==0.22.0; python_version >= "3.9"
+
+faster-whisper==1.1.0; python_version < "3.9"
+faster-whisper==1.2.0; python_version >= "3.9"

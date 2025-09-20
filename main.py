@@ -15,7 +15,7 @@ import torch
 # 定义音频波形数据的模型
 class AudioWaveform(BaseModel):
     sample_rate: int
-    data: list[float]  # 音频波形数据
+    data: List[float]  # 音频波形数据
 
 
 class WhisperModelManager:
