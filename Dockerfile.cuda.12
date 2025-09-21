@@ -1,0 +1,29 @@
+# 基于用户指定的 base image
+FROM pytorch/pytorch:2.6.0-cuda12.4-cudnn9-devel
+
+# 避免 Python 生成 .pyc 文件并让输出立即刷出
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN sed -i 's|http://archive.ubuntu.com/ubuntu/|http://mirrors.tuna.tsinghua.edu.cn/ubuntu/|g' /etc/apt/sources.list
+
+# 安装系统依赖（ffmpeg 用于处理音频，libsndfile 用于读取音频，build-essential/cmake 用于可能的本地编译）
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    git curl ca-certificates ffmpeg libsndfile1 build-essential cmake pkg-config && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt ./
+
+# 升级 pip / 安装 python 辅助包
+RUN python -m pip install --upgrade pip setuptools wheel && \
+    python3 -m pip install --no-cache-dir -r requirements.txt
+
+COPY ./main.py .
+
+ENV WHISPER_MODEL=Systran/faster-whisper-large-v2
+ENV DEVICE=cuda
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

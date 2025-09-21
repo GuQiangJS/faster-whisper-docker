@@ -63,20 +63,20 @@ jobs:
   #         docker push $IMAGE:${TAG}-latest
   #         docker push $IMAGE:${TAG}-${DATE_TAG}
 
-  build-gpu:
+  build-cuda-12:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          #         # - base_image: 11.6.1-cudnn8-runtime-ubuntu20.04
-          #         #   torch_version: 1.13.1
-          #         #   torch_cuda_suffix: cu116
-          - base_image: 12.1.0-cudnn8-runtime-ubuntu22.04
-            torch_version: 2.5.1
-            torch_cuda_suffix: cu121
-          # - base_image: 12.6.3-cudnn-runtime-ubuntu24.04
-          #   torch_version: 2.8.0
-          #   torch_cuda_suffix: cu126
+    # strategy:
+    #   matrix:
+    #     include:
+    #         # - base_image: 11.6.1-cudnn8-runtime-ubuntu20.04
+    #         #   torch_version: 1.13.1
+    #         #   torch_cuda_suffix: cu116
+    # - base_image: 12.1.0-cudnn8-runtime-ubuntu22.04
+    #   torch_version: 2.5.1
+    #   torch_cuda_suffix: cu121
+    # - base_image: 12.6.3-cudnn-runtime-ubuntu24.04
+    #   torch_version: 2.8.0
+    #   torch_cuda_suffix: cu126
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -95,11 +95,9 @@ jobs:
         run: |
           DATE_TAG=$(date +%Y%m%d)
           IMAGE=ghcr.io/${REPO}/whisper-service
-          docker build -f Dockerfile.cuda \
-            --build-arg BASE_IMAGE=${{ matrix.base_image }} \
-            --build-arg TORCH_VERSION=${{ matrix.torch_version }} \
-            --build-arg TORCH_CUDA_SUFFIX=${{ matrix.torch_cuda_suffix }} \
-            -t $IMAGE:cuda${{ matrix.torch_cuda_suffix }}-latest \
-            -t $IMAGE:cuda${{ matrix.torch_cuda_suffix }}-${DATE_TAG} .
-          docker push $IMAGE:cuda${{ matrix.torch_cuda_suffix }}-latest
-          docker push $IMAGE:cuda${{ matrix.torch_cuda_suffix }}-${DATE_TAG}
+          TAG=torch2.6-cuda12.4-cudnn9-ubuntu22.04
+          docker build -f Dockerfile.cuda.12
+            -t $IMAGE:${TAG}-latest \
+            -t $IMAGE:${TAG}-${DATE_TAG} .
+          docker push $IMAGE:${TAG}-latest
+          docker push $IMAGE:${TAG}-${DATE_TAG}

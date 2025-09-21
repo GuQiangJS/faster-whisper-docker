@@ -17,6 +17,18 @@ faster-whisper-docker 是一个基于 Docker 的语音识别服务部署项目�
 - CPU 版本：适用于没有 GPU 或不需要 GPU 加速的环境
 - GPU 版本：适用于支持 CUDA 的 NVIDIA GPU，提供更快的转录速度
 
+> 其实这个项目是为了挽救我上古时代的 750Ti 显卡才开始弄的。也怪我自己没有仔细看各个项目的说明。
+> faster-whisper 从一开始就需要 ctranslate2 3.5 以上的版本，而 ctranslate2 从 3 版本开始就抛弃了 CUDA 10
+> 但是上古的 750Ti 显卡最多也就支持到了 CUDA 11。结果我安装的是 CUDA12 的版本。
+> 基于`pytorch/pytorch:2.6.0-cuda12.4-cudnn9-devel`来运行（Dockerfile.cuda.12)，也依旧提示
+>
+> ```
+> INFO:faster_whisper:Processing audio with duration 01:13.003 Unable to load any of {libcudnn_ops.so.9.1.0, libcudnn_ops.so.9.1, libcudnn_ops.so.9, libcudnn_ops.so} Invalid handle. Cannot load symbol cudnnCreateTensorDescriptor
+> ```
+>
+> 哎，穷人变异失败，也没那么多时间折腾了。等换了显卡或者有时间再折腾了。
+> **CPU 版本的镜像是可以用的，但是 CUDA 版本在我的旧机器上跑不起来，新的机器不知道行不行。**
+
 ## 构建方式
 
 ### 自行构建
@@ -35,7 +47,7 @@ docker-compose up -d --build whisper-service-cpu
 构建并运行 GPU 版本：
 
 ```bash
-docker-compose up -d --build whisper-service-gpu
+docker-compose up -d --build whisper-service-cuda
 ```
 
 ### 拉取镜像方式
@@ -49,7 +61,7 @@ docker pull ghcr.io/guqiangjs/faster-whisper-docker:cpu-latest
 拉取 GPU 版本：
 
 ```bash
-docker pull ghcr.io/guqiangjs/faster-whisper-docker:gpu-latest
+docker pull ghcr.io/guqiangjs/faster-whisper-docker:cuda-latest
 ```
 
 ## 调用方式
