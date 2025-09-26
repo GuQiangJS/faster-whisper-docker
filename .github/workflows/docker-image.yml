@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - base_image: 12.8.1-cudnn-runtime-ubuntu24.04
+          - base_image: 12.8.1-cudnn-runtime-ubuntu22.04
             torch_version: 2.7.1
             torch_cuda_suffix: cu128
     steps:
