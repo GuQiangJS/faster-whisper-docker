@@ -1,12 +1,10 @@
 # Dockerfile.gpu
 ARG BASE_IMAGE=11.6.1-cudnn8-runtime-ubuntu20.04
-ARG TORCH_VERSION=1.13.1
-ARG TORCH_CUDA_SUFFIX=cu116
 
 FROM nvidia/cuda:${BASE_IMAGE}
 
-ENV TORCH_VERSION=${TORCH_VERSION}
-ENV TORCH_CUDA_SUFFIX=${TORCH_CUDA_SUFFIX}
+ARG TORCH_VERSION=1.13.1
+ARG TORCH_CUDA_SUFFIX=cu116
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -34,7 +32,7 @@ WORKDIR /app
 # 拷贝依赖文件并安装
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install torch==${TORCH_VERSION} --no-cache-dir --index-url https://download.pytorch.org/whl/${TORCH_CUDA_SUFFIX}
+RUN pip install torch==${TORCH_VERSION}+${TORCH_CUDA_SUFFIX} --no-cache-dir --index-url https://download.pytorch.org/whl/${TORCH_CUDA_SUFFIX}
 
 # 拷贝应用代码
 COPY ./main.py . 
