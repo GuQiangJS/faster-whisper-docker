@@ -62,7 +62,7 @@ jobs:
         run: |
           DATE_TAG=$(date +%Y%m%d)
           IMAGE=ghcr.io/${REPO}/whisper-service
-          TAG=torch2.6-cuda12.4-cudnn9-ubuntu22.04
+          TAG=torch${{ matrix.torch_version }}-${{ matrix.base_image }}
           docker build -f Dockerfile.cuda \
             --build-arg BASE_IMAGE=${{ matrix.base_image }} \
             --build-arg TORCH_VERSION=${{ matrix.torch_version }} \
