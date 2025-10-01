@@ -27,7 +27,7 @@ faster-whisper-docker 是一个基于 Docker 的语音识别服务部署项目�
 > ```
 >
 > 哎，穷人变异失败，也没那么多时间折腾了。等换了显卡或者有时间再折腾了。
-> **CPU 版本的镜像是可以用的，但是 CUDA 版本在我的旧机器上跑不起来，新的机器不知道行不行。**
+> **CPU 版本的镜像是可以用的，CUDA 版本暂时只是基于 cuda 12.8.1 使用 github actions 构建的镜像，如果需要构建其他版本可以参考 [docker-image.yml](.github/workflows/docker-image.yml) 中的 `build-cuda` 部分自行构建**
 
 ## 构建方式
 
@@ -61,7 +61,30 @@ docker pull ghcr.io/guqiangjs/faster-whisper-docker:cpu-latest
 拉取 GPU 版本：
 
 ```bash
-docker pull ghcr.io/guqiangjs/faster-whisper-docker:cuda-latest
+docker pull ghcr.io/guqiangjs/faster-whisper-docker:torch2.7.1-12.8.1-cudnn-runtime-ubuntu22.04-latest
+```
+
+## 直接使用 docker-compose
+
+```yaml
+services:
+  whisper-service:
+    image: ghcr.io/guqiangjs/faster-whisper-docker/whisper-service:torch2.7.1-12.8.1-cudnn-runtime-ubuntu22.04-latest
+    container_name: whisper-service
+    restart: unless-stopped
+    ports:
+      - "8993:8000"
+    volumes:
+      - ./hf-hub-cache:/root/.cache/huggingface/hub
+    environment:
+      - HF_ENDPOINT=https://hf-mirror.com
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 ```
 
 ## 调用方式
