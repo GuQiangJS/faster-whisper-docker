@@ -189,6 +189,7 @@ async def transcribe_waveform(
         device: str = Query(os.environ.get("DEVICE", "auto")),
         compute_type: str = Query("default"),
         language: Optional[str] = Query(None),
+        task: str = Query("transcribe"),
         vad_filter: Optional[bool] = Query(False),
         initial_prompt: Optional[Union[str, Iterable[int]]] = Query(None),
         log_progress: Optional[bool] = Query(False),
@@ -203,7 +204,8 @@ async def transcribe_waveform(
         initial_prompt=initial_prompt,
         log_progress=log_progress,
         condition_on_previous_text=condition_on_previous_text,
-        vad_filter=vad_filter)
+        vad_filter=vad_filter,
+        task=task)
 
 
 def run_transcription(audio, model, device, compute_type, **kwargs):
