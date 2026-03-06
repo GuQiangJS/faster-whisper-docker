@@ -1,5 +1,7 @@
 # faster-whisper-docker
 
+> 2026-03-06 增加了对于 `Qwen/Qwen3-ASR` 的支持。
+
 faster-whisper-docker 是一个基于 Docker 的语音识别服务部署项目，使用 Faster-Whisper 模型实现高效的 speech-to-text 转录。项目提供 HTTP 接口，支持：
 
 - 上传整个音频文件方式进行识别；

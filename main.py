@@ -10,6 +10,7 @@ from pydantic import BaseModel
 import logging
 import gc
 import torch
+from qwen_asr import Qwen3ASRModel
 
 
 # 定义音频波形数据的模型
@@ -71,6 +72,59 @@ class WhisperModelManager:
         return True
 
 
+class QwenASRModelManager:
+
+    def __init__(self):
+        self.models = {}
+
+    def get_model(self, model_id: str, device: str):
+
+        key = (model_id, device)
+
+        if key not in self.models:
+
+            dtype = torch.bfloat16 if device == "cuda" else torch.float32
+            device_map = "cuda:0" if device == "cuda" else "cpu"
+
+            model = Qwen3ASRModel.from_pretrained(model_id,
+                                                  dtype=dtype,
+                                                  device_map=device_map,
+                                                  max_new_tokens=256)
+
+            self.models[key] = model
+
+        return self.models[key]
+
+    def transcribe(self, audio, model_id: str, device: str, language=None):
+
+        model = self.get_model(model_id, device)
+
+        results = model.transcribe(audio=audio, language=language)
+
+        return results
+
+    def release_model(self, model_id: str, device: str):
+
+        key = (model_id, device)
+
+        if key in self.models:
+            del self.models[key]
+            torch.cuda.empty_cache()
+            return True
+
+        return False
+
+    def release_all(self):
+        """
+        释放所有已加载的模型，清理缓存
+        """
+        self.models.clear()
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        return True
+
+
 def process_audio(audio: Union[str, object, np.ndarray]):
     """
     处理音频的核心函数，支持多种输入类型
@@ -104,7 +158,8 @@ def process_audio(audio: Union[str, object, np.ndarray]):
 
 app = FastAPI(title="Whisper Service", version="1.0.0")
 
-manager = WhisperModelManager()
+whisper_manager = WhisperModelManager()
+qwen_manager = QwenASRModelManager()
 logging.basicConfig(level=logging.INFO)
 
 
@@ -114,7 +169,7 @@ async def release_model(model: str = Query("Systran/faster-whisper-large-v2"),
     """
     释放指定模型vi
     """
-    released = manager.release_model(model, device)
+    released = whisper_manager.release_model(model, device)
     if not released:
         raise HTTPException(status_code=404,
                             detail=f"模型 {model} (device={device}) 不存在或未加载")
@@ -126,7 +181,8 @@ async def release_all_models():
     """
     释放所有缓存的模型
     """
-    manager.release_all()
+    whisper_manager.release_all()
+    qwen_manager.release_all()
     return {"status": "success", "released": "all models"}
 
 
@@ -211,9 +267,25 @@ async def transcribe_waveform(
 def run_transcription(audio, model, device, compute_type, **kwargs):
     logging.info(f'model={model},device={device},compute_type={compute_type}')
     # 注意：此处传入的应为解码后的音频数组
-    segments, info = manager.transcribe(audio,
-                                        model_id=model,
-                                        device=device,
-                                        compute_type=compute_type,
-                                        **kwargs)
+    if "qwen3-asr" in model.lower():
+        results = qwen_manager.transcribe(audio,
+                                          model_id=model,
+                                          device=device,
+                                          language=kwargs.get("language"))
+        output = []
+        for r in results:
+            output.append({
+                "text": r.text,
+                "start": 0,
+                "end": 0,
+                "language": r.language
+            })
+
+        return output
+    else:
+        segments, info = whisper_manager.transcribe(audio,
+                                                    model_id=model,
+                                                    device=device,
+                                                    compute_type=compute_type,
+                                                    **kwargs)
     return [seg._asdict() for seg in segments]

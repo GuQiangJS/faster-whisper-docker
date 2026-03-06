@@ -9,3 +9,5 @@ tokenizers==0.22.0; python_version >= "3.9"
 
 faster-whisper==1.1.0; python_version < "3.9"
 faster-whisper==1.2.0; python_version >= "3.9"
+
+qwen-asr==0.0.6
