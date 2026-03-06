@@ -270,8 +270,8 @@ def run_transcription(audio, model, device, compute_type, **kwargs):
     logging.info(f'model={model},device={device},compute_type={compute_type}')
     # 注意：此处传入的应为解码后的音频数组
     if "qwen3-asr" in model.lower():
-        results = qwen_manager.transcribe(audio=(audio.data,
-                                                 audio.sample_rate),
+        audio = (np.array(audio.data),audio.sample_rate),
+        results = qwen_manager.transcribe(audio=audio,
                                           model_id=model,
                                           device=device,
                                           language=kwargs.get("language"))
