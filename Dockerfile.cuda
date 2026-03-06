@@ -31,7 +31,7 @@ WORKDIR /app
 
 # 拷贝依赖文件并安装
 COPY requirements.txt ./
-RUN pip install --no-cache-dir numpy==2.2.6 && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir numpy==2.2.6 typing-extensions==4.15.0 && pip install --no-cache-dir -r requirements.txt
 RUN pip install torch==${TORCH_VERSION}+${TORCH_CUDA_SUFFIX} --no-cache-dir --index-url https://download.pytorch.org/whl/${TORCH_CUDA_SUFFIX}
 
 # 拷贝应用代码
