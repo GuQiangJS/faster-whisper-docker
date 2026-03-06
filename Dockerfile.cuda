@@ -16,7 +16,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     python3 python3-pip python3-venv python3-dev \
-    ffmpeg git sox libsox-dev && \
+    ffmpeg git && \
     rm -rf /var/lib/apt/lists/*
 
 # 确保 python/pip 指向系统 python3
@@ -31,7 +31,7 @@ WORKDIR /app
 
 # 拷贝依赖文件并安装
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir numpy==2.2.6 && pip install --no-cache-dir -r requirements.txt
 RUN pip install torch==${TORCH_VERSION}+${TORCH_CUDA_SUFFIX} --no-cache-dir --index-url https://download.pytorch.org/whl/${TORCH_CUDA_SUFFIX}
 
 # 拷贝应用代码
