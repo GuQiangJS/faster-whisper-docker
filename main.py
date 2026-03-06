@@ -169,7 +169,10 @@ async def release_model(model: str = Query("Systran/faster-whisper-large-v2"),
     """
     释放指定模型vi
     """
-    released = whisper_manager.release_model(model, device)
+    if "qwen3-asr" in model.lower():
+        released = qwen_manager.release_model(model, device)
+    else:
+        released = whisper_manager.release_model(model, device)
     if not released:
         raise HTTPException(status_code=404,
                             detail=f"模型 {model} (device={device}) 不存在或未加载")
@@ -250,7 +253,6 @@ async def transcribe_waveform(
         initial_prompt: Optional[Union[str, Iterable[int]]] = Query(None),
         log_progress: Optional[bool] = Query(False),
         condition_on_previous_text: Optional[bool] = Query(False)):
-    audio = np.array(audio.data)
     return run_transcription(
         audio=audio,
         model=model,
@@ -268,7 +270,8 @@ def run_transcription(audio, model, device, compute_type, **kwargs):
     logging.info(f'model={model},device={device},compute_type={compute_type}')
     # 注意：此处传入的应为解码后的音频数组
     if "qwen3-asr" in model.lower():
-        results = qwen_manager.transcribe(audio,
+        results = qwen_manager.transcribe(audio=(audio.data,
+                                                 audio.sample_rate),
                                           model_id=model,
                                           device=device,
                                           language=kwargs.get("language"))
@@ -283,6 +286,7 @@ def run_transcription(audio, model, device, compute_type, **kwargs):
 
         return output
     else:
+        audio = np.array(audio.data)
         segments, info = whisper_manager.transcribe(audio,
                                                     model_id=model,
                                                     device=device,
